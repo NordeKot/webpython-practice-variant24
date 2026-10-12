@@ -18,7 +18,8 @@ if errorlevel 1 goto fail
 if errorlevel 1 goto fail
 .venv\Scripts\python.exe -m coverage html
 if errorlevel 1 goto fail
-echo Open htmlcov\index.html to view coverage.
+echo Opening HTML coverage report: htmlcov\index.html
+start "" "%CD%\htmlcov\index.html"
 pause
 exit /b 0
 :fail

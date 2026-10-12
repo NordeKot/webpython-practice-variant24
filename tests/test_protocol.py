@@ -130,13 +130,19 @@ def test_non_object_record(table):
         raise AssertionError("Ожидалась ошибка типа записи")
 
 
-@given(empty=st.just(b""))
-def test_disconnected_peer(empty):
-    """Обработчик не падает при ответе отключившемуся клиенту."""
+@given(close_completely=st.booleans())
+def test_disconnected_peer(close_completely):
+    """Обработать закрытие клиента без чтения из оборванного сокета."""
     from variant24.server import Handler
 
     left, right = socket.socketpair()
-    left.close()
-    with right:
+    with left, right:
+        if close_completely:
+            left.close()
+        else:
+            left.shutdown(socket.SHUT_WR)
         Handler(right, ("local", 0), None)
-        assert right.recv(1) == empty
+        if not close_completely:
+            response = read_response(left, 0)
+            assert response["ok"] is False
+            assert response["error"]
