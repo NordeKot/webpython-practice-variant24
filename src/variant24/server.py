@@ -29,6 +29,7 @@ class Handler(socketserver.BaseRequestHandler):
             raise ProtocolError("Неизвестная операция")
         size = int.from_bytes(header[3:6], BYTE_ORDER)
         arguments = recv_body(self.request, size)
+        self.arguments = arguments
         if not isinstance(arguments, list):
             raise ProtocolError("Тело запроса должно быть массивом args")
         with self.server.lock:
@@ -39,6 +40,7 @@ class Handler(socketserver.BaseRequestHandler):
         """Ответить результатом либо ошибкой; записать запрос в stdout."""
         self.request.settimeout(SOCKET_TIMEOUT)
         operation = UNKNOWN_OPERATION
+        self.arguments = None
         header = b""
         try:
             header = recv_exact(self.request, REQUEST_HEADER_SIZE)
@@ -48,7 +50,8 @@ class Handler(socketserver.BaseRequestHandler):
         except (ValueError, TypeError, OSError) as error:
             result = {"ok": False, "error": str(error)}
         print(json.dumps({"peer": self.client_address, "header": header.hex(),
-                          "operation": operation, "response": result},
+                          "operation": operation, "arguments": self.arguments,
+                          "response": result},
                          ensure_ascii=False), flush=True)
         try:
             self.request.sendall(pack_response(operation, result))
@@ -64,7 +67,7 @@ class RpcServer(socketserver.ThreadingTCPServer):
     block_on_close = True
 
     def __init__(self, address=(DEFAULT_HOST, DEFAULT_PORT), clock=None):
-        """Создать сокет, модель и блокировку; порт 0 выбирает свободный порт."""
+        """Создать сокет и модель; порт 0 выбирает свободный порт."""
         self.model = Model(clock)
         self.lock = threading.RLock()
         super().__init__(address, Handler)
