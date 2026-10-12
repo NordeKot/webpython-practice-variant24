@@ -6,7 +6,6 @@ from .model import Model
 from .operations import METHODS
 from .storage import ModelError
 
-
 HELP = 'Формат: {"method": "list_entity", "args": []}; выход: exit'
 
 

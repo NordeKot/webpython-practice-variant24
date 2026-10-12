@@ -5,6 +5,10 @@ if not exist .venv\Scripts\python.exe (
     pause
     exit /b 1
 )
+.venv\Scripts\python.exe -m pycodestyle --max-line-length=79 src tests
+if errorlevel 1 goto fail
+.venv\Scripts\python.exe -m pycodestyle --select=W505 --max-doc-length=72 src tests
+if errorlevel 1 goto fail
 .venv\Scripts\python.exe -m ruff check .
 if errorlevel 1 goto fail
 .venv\Scripts\python.exe -m coverage erase

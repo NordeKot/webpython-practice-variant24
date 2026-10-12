@@ -12,10 +12,10 @@ requires-python = ">=3.10"
 where = ["src"]
 
 [tool.ruff]
-line-length = 80
+line-length = 79
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "C90"]
+select = ["E", "F", "W", "C90", "N", "I"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

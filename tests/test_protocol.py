@@ -4,12 +4,19 @@ import json
 import socket
 import threading
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from variant24.client import RpcClient, RpcError
 from variant24.protocol import (
-    MAX_BODY_SIZE, ProtocolError, encode_body, pack_request, pack_response,
-    read_response, recv_body, recv_exact,
+    MAX_BODY_SIZE,
+    ProtocolError,
+    encode_body,
+    pack_request,
+    pack_response,
+    read_response,
+    recv_body,
+    recv_exact,
 )
 
 from .support import running_server
@@ -69,7 +76,8 @@ def test_invalid_requests(kind):
     }
     expected_op = 0 if kind in ("operation", "short") else 4
     with running_server() as server:
-        with socket.create_connection(server.server_address, timeout=5) as sock:
+        with socket.create_connection(
+                server.server_address, timeout=5) as sock:
             sock.sendall(requests[kind])
             sock.shutdown(socket.SHUT_WR)
             response = read_response(sock, expected_op)

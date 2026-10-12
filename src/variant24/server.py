@@ -7,8 +7,13 @@ import threading
 from .model import Model
 from .operations import METHODS
 from .protocol import (
-    BYTE_ORDER, REQUEST_HEADER_SIZE, VERSION, ProtocolError, pack_response,
-    recv_body, recv_exact,
+    BYTE_ORDER,
+    REQUEST_HEADER_SIZE,
+    VERSION,
+    ProtocolError,
+    pack_response,
+    recv_body,
+    recv_exact,
 )
 
 DEFAULT_HOST = "127.0.0.1"
@@ -21,7 +26,8 @@ class Handler(socketserver.BaseRequestHandler):
     """Обработчик одного запроса на соединение."""
 
     def dispatch(self, header):
-        """Проверить заголовок и вызвать функцию модели под блокировкой."""
+        """Проверить заголовок и вызвать функцию модели под блокировкой.
+        """
         if header[0] != VERSION:
             raise ProtocolError("Неподдерживаемая версия")
         operation = int.from_bytes(header[1:3], BYTE_ORDER)
@@ -37,7 +43,8 @@ class Handler(socketserver.BaseRequestHandler):
             return method(*arguments)
 
     def handle(self):
-        """Ответить результатом либо ошибкой; записать запрос в stdout."""
+        """Ответить результатом либо ошибкой; записать запрос в stdout.
+        """
         self.request.settimeout(SOCKET_TIMEOUT)
         operation = UNKNOWN_OPERATION
         self.arguments = None
@@ -60,7 +67,9 @@ class Handler(socketserver.BaseRequestHandler):
 
 
 class RpcServer(socketserver.ThreadingTCPServer):
-    """Потоковый сервер; операции атомарны относительно общего хранилища."""
+    """Потоковый сервер; операции атомарны относительно общего
+    хранилища.
+    """
 
     allow_reuse_address = True
     daemon_threads = True

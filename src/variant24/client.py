@@ -19,7 +19,8 @@ class RpcClient:
         self.address = (host, port)
 
     def call(self, name, *arguments):
-        """Передать аргументы по TCP и вернуть результат или RpcError."""
+        """Передать аргументы по TCP и вернуть результат или RpcError.
+        """
         operation = OP_CODES[name]
         with socket.create_connection(self.address, SOCKET_TIMEOUT) as sock:
             sock.sendall(pack_request(operation, arguments))

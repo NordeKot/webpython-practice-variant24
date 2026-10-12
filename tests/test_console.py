@@ -2,7 +2,8 @@
 
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from variant24.__main__ import main
 from variant24.client import RpcClient

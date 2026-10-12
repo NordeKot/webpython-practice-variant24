@@ -1,8 +1,12 @@
 """Сгенерированные Hypothesis сценарии всех 13 методов RPC."""
 
-from hypothesis import settings, strategies as st
+from hypothesis import settings
+from hypothesis import strategies as st
 from hypothesis.stateful import (
-    RuleBasedStateMachine, initialize, invariant, rule,
+    RuleBasedStateMachine,
+    initialize,
+    invariant,
+    rule,
 )
 
 from variant24.client import RpcClient, RpcError
@@ -20,7 +24,8 @@ class RpcMachine(RuleBasedStateMachine):
     """Сравнить последовательности реальных TCP-вызовов с эталоном."""
 
     def __init__(self):
-        """Поднять новый сервер для каждого сгенерированного сценария."""
+        """Поднять новый сервер для каждого сгенерированного сценария.
+        """
         super().__init__()
         self.context = running_server()
         self.server = self.context.__enter__()
@@ -29,7 +34,8 @@ class RpcMachine(RuleBasedStateMachine):
         self.serial = 1000
 
     def compare(self, method, *arguments):
-        """Сравнить результат или категорию ошибки после одного вызова."""
+        """Сравнить результат или категорию ошибки после одного вызова.
+        """
         try:
             expected = self.reference.call(method, arguments)
         except ReferenceError:
@@ -43,7 +49,8 @@ class RpcMachine(RuleBasedStateMachine):
 
     @initialize(text=TEXT, key=KEYS)
     def full_lifecycle(self, text, key):
-        """В каждом сценарии вызвать все методы с генерируемыми данными."""
+        """В каждом сценарии вызвать все методы с генерируемыми данными.
+        """
         for table in TABLES:
             row = record(table, key, key, 0, text)
             self.compare(f"create_{table}", row)
@@ -61,7 +68,8 @@ class RpcMachine(RuleBasedStateMachine):
     @rule(table=st.sampled_from(TABLES), key=KEYS, parent=KEYS,
           offset=OFFSETS, text=TEXT)
     def create(self, table, key, parent, offset, text):
-        """Создавать записи с существующими или отсутствующими ссылками."""
+        """Создавать записи с существующими или отсутствующими ссылками.
+        """
         self.compare(f"create_{table}",
                      record(table, key, parent, offset, text))
 
@@ -74,7 +82,8 @@ class RpcMachine(RuleBasedStateMachine):
     @rule(table=st.sampled_from(TABLES), key=KEYS, text=TEXT,
           kind=st.sampled_from(["missing", "extra", "type", "boolean"]))
     def invalid_record(self, table, key, text, kind):
-        """Проверять неполные записи, лишние поля и неправильные типы."""
+        """Проверять неполные записи, лишние поля и неправильные типы.
+        """
         row = record(table, key, key, 0, text)
         if kind == "missing":
             del row["created"]
@@ -113,7 +122,8 @@ class RpcMachine(RuleBasedStateMachine):
 
     @invariant()
     def snapshots(self):
-        """После каждого шага проверять таблицы и результат соединения."""
+        """После каждого шага проверять таблицы и результат соединения.
+        """
         for table in TABLES:
             self.compare(f"list_{table}")
         self.compare("recent_feedback")

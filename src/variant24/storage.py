@@ -10,15 +10,20 @@ class ModelError(ValueError):
 
 
 class Storage:
-    """Изолированное хранилище; clock возвращает Unix-время в секундах."""
+    """Изолированное хранилище; clock возвращает Unix-время в секундах.
+    """
 
     def __init__(self, clock=time.time):
-        """Создать пустые таблицы с независимым временем для тестирования."""
+        """Создать пустые таблицы с независимым временем для
+        тестирования.
+        """
         self.tables = {name: {} for name in SCHEMAS}
         self.clock = clock
 
     def validate(self, table, record):
-        """Проверить полный набор полей и точные типы, включая запрет bool."""
+        """Проверить полный набор полей и точные типы, включая запрет
+        bool.
+        """
         schema = SCHEMAS[table]
         if not isinstance(record, dict) or record.keys() != schema.keys():
             raise ModelError("Нужен объект с точным набором полей таблицы")
@@ -40,7 +45,7 @@ class Storage:
         return row
 
     def get(self, table, identifier):
-        """Получить запись; отсутствующий или неверный ключ является ошибкой."""
+        """Получить запись или сообщить об ошибке ключа."""
         if type(identifier) is not int:
             raise ModelError("Идентификатор должен иметь тип int")
         if identifier not in self.tables[table]:
@@ -48,10 +53,13 @@ class Storage:
         return self.tables[table][identifier]
 
     def delete(self, table, identifier):
-        """Удалить запись без зависимых записей; каскадного удаления нет."""
+        """Удалить запись без зависимых записей; каскадного удаления
+        нет.
+        """
         self.get(table, identifier)
         for child, (field, parent) in REFERENCES.items():
-            if parent == table and self.is_referenced(child, field, identifier):
+            if parent == table and self.is_referenced(
+                    child, field, identifier):
                 raise ModelError("На запись ссылаются другие записи")
         del self.tables[table][identifier]
         return None
@@ -63,11 +71,13 @@ class Storage:
                    for row in self.tables[table].values())
 
     def all(self, table):
-        """Вернуть список кортежей, отсортированный по идентификатору."""
+        """Вернуть список кортежей, отсортированный по идентификатору.
+        """
         return [row for _, row in sorted(self.tables[table].items())]
 
     def recent_feedback(self):
-        """Выполнить DISTINCT-проекцию левого соединения за пять минут."""
+        """Выполнить DISTINCT-проекцию левого соединения за пять минут.
+        """
         cutoff = self.clock() - WINDOW_SECONDS
         result = set()
         feedback = self.all("feedback")
